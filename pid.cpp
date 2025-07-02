@@ -1,7 +1,7 @@
 #include "pid.h"
 #include <Arduino.h>
 
-pid::pid(float kp, float ki, float kd) : kp(kp), ki(ki), kd(kd), last_error(0), setpoint(0), intergral(0), lasttime(0) {};
+pid::pid(float kp, float ki, float kd) : offset(80), kp(kp), ki(ki), kd(kd), last_error(0), setpoint(0), integral(0), lasttime(0) {};
 
 void pid::set_setpoint(float sp)
 {
@@ -10,12 +10,20 @@ void pid::set_setpoint(float sp)
 
 float pid::calculate(float input, float delta)
 {
-    float error = abs(setpoint - input);
-    intergral = intergral + error * delta;
-    float deri = (error - last_error) / 2;
+    float error = input - setpoint;
+    integral = integral + error * delta;
+    integral = constrain(integral, -500, 500);
 
-    float output = kp * error + ki * intergral + kd * deri;
+    float deri = (error - last_error) / delta;
 
+    float correction = kp * error + ki * integral + kd * deri;
     last_error = error;
+
+    float output = offset + correction;
+    output = constrain(output, 0, 255);
+    Serial.print(" Error: ");
+    Serial.print(error);
+    Serial.print(" PWM: ");
+    Serial.println(output);
     return output;
 }

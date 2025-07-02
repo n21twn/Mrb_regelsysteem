@@ -10,12 +10,13 @@ public:
     float calculate(float input, float delta);
 
 private:
+    float offset;
     float kp;
     float ki;
     float kd;
     float last_error;
     float setpoint;
-    float intergral;
+    float integral;
     unsigned long lasttime;
 };
 #endif
